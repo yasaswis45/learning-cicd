@@ -1,10 +1,35 @@
-name: My First Workflow
+# 1. The name of your workflow as it appears in the GitHub UI
+name: Execute Automated Test Suite
 
-on: [push] # The trigger
+# 2. The Trigger: Run this whenever someone pushes code to the 'main' branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
+# 3. The Jobs: What the virtual machine actually needs to do
 jobs:
-  say-hello-job:
-    runs-on: ubuntu-latest # The environment
+  test-job:
+    # Tell GitHub to spin up a fresh Ubuntu Linux virtual machine
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Run a one-line script
-        run: echo "Hello, World!"
+      # Step 1: Clone your repository's code onto the Ubuntu runner
+      - name: Checkout project code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js on the runner environment
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Specify your project's version
+          cache: 'npm'       # Caches dependencies to make future runs faster
+
+      # Step 3: Install your project's dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Run your actual test script (defined in your package.json)
+      - name: Run test suite
+        run: npm test
